@@ -9,9 +9,11 @@
 	throw_speed = 3
 	throw_range = 7
 	max_amount = 60
+	novariants = TRUE
 	var/turf_type = null
 	var/mineralType = null
-	novariants = TRUE
+	var/desired_dir = NORTH
+	var/desired_icon_state = "floor"
 
 /obj/item/stack/tile/Initialize(mapload, amount)
 	. = ..()
@@ -217,3 +219,29 @@
 	materials = list() // All other Borg versions of items have no Metal or Glass - RR
 	is_cyborg = 1
 	cost = 125
+
+/obj/item/stack/tile/plasteel/ui_interact(mob/user, ui_key = "main", \
+	datum/tgui/ui = null, force_open = FALSE, datum/tgui/master_ui = null, datum/ui_state/state = GLOB.default_state)
+
+	ui = SStgui.try_update_ui(user, src, ui_key, ui, force_open)
+	if(!ui)
+		var/datum/asset/assets = get_asset_datum(/datum/asset/spritesheet/pipes)
+		assets.send(user)
+
+		ui = new(user, src, ui_key, "rpd", name, 300, 550, master_ui, state)
+		ui.open()
+
+/obj/item/stack/tile/plasteel/ui_data(mob/user)
+	var/list/data = list(
+		"Direction" = desired_dir,
+		"Colour" = desired_icon_state
+	)
+
+/obj/item/stack/tile/plasteel/ui_act(action, params)
+	if(..())
+		return
+	if(!usr.canUseTopic(src))
+		return
+
+	switch(action)
+		if ()
