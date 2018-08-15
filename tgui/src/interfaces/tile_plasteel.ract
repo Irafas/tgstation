@@ -1,10 +1,19 @@
+<ui-display title='Floor'>
+	<ui-section>
+		{{#each data.floors}}
+			<ui-button grid icon='wrench' action='set_desired_floor' params='{"floor": "{{floor}}"}' state='{{data.desired_floor == floor ? "selected" : null}}'>{{floor}}</ui-button>
+		{{/each}}
+	</ui-section>
+</ui-display>
 <ui-display title='Direction'>
-	{{#each data.preview_rows}}
-		<ui-section>
-			{{#each previews}}
-				<ui-button state='{{selected ? "selected" : null}}' action='setdir'
-					params='{"dir": {{dir}}, "flipped": {{flipped}}}'><span class="pipes32x32 {{dir}}-{{icon_state}}" title="{{dir_name}}"></span></ui-button>
-			{{/each}}
-		</ui-section>
-	{{/each}}
+	<ui-section>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "1"}' state='{{data.desired_dir == 1 ? "selected" : null}}'>North</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "5"}' state='{{data.desired_dir == 5 ? "selected" : null}}'>North East</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "4"}' state='{{data.desired_dir == 4 ? "selected" : null}}'>East</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "6"}' state='{{data.desired_dir == 6 ? "selected" : null}}'>South East</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "2"}' state='{{data.desired_dir == 2 ? "selected" : null}}'>South</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "9"}' state='{{data.desired_dir == 9 ? "selected" : null}}'>South West</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "8"}' state='{{data.desired_dir == 8 ? "selected" : null}}'>West</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "10"}' state='{{data.desired_dir == 10 ? "selected" : null}}'>North West</ui-button>
+	</ui-section>
 </ui-display>

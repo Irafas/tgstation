@@ -13,7 +13,7 @@
 	var/turf_type = null
 	var/mineralType = null
 	var/desired_dir = NORTH
-	var/desired_icon_state = "floor"
+	var/desired_icon_state = "red"
 
 /obj/item/stack/tile/Initialize(mapload, amount)
 	. = ..()
@@ -220,22 +220,32 @@
 	is_cyborg = 1
 	cost = 125
 
-/obj/item/stack/tile/plasteel/ui_interact(mob/user, ui_key = "main", \
-	datum/tgui/ui = null, force_open = FALSE, datum/tgui/master_ui = null, datum/ui_state/state = GLOB.default_state)
+/obj/item/stack/tile/plasteel/ui_interact(mob/user, ui_key = "main", datum/tgui/ui = null, force_open = FALSE, datum/tgui/master_ui = null, datum/ui_state/state = GLOB.default_state)
 
 	ui = SStgui.try_update_ui(user, src, ui_key, ui, force_open)
 	if(!ui)
 		var/datum/asset/assets = get_asset_datum(/datum/asset/spritesheet/pipes)
 		assets.send(user)
 
-		ui = new(user, src, ui_key, "rpd", name, 300, 550, master_ui, state)
+		ui = new(user, src, ui_key, "tile_plasteel", name, 300, 550, master_ui, state)
 		ui.open()
 
 /obj/item/stack/tile/plasteel/ui_data(mob/user)
 	var/list/data = list(
 		"Direction" = desired_dir,
-		"Colour" = desired_icon_state
+		"desired_floor" = desired_icon_state
 	)
+
+	var/list/floors = list("floor","white","bar","cafeteria","red","redcorner","redfull","whitered","whiteredcorner",\
+	"whiteredfull","blue","bluecorner","bluefull","whiteblue","whitebluecorner","whitebluefull","green","greencorner",\
+	"greenfull","whitegreen","whitegreencorner","whitegreenfull","yellow","yellowcorner","yellowfull","whiteyellow",\
+	"whiteyellowcorner","whiteyellowfull")
+
+	var/Floor_Type_List[0]
+	for(var/re in floors)
+		Floor_Type_List.Add(list(list("floor" = re)))
+	data["floors"] = Floor_Type_List
+	return data
 
 /obj/item/stack/tile/plasteel/ui_act(action, params)
 	if(..())
@@ -244,4 +254,25 @@
 		return
 
 	switch(action)
-		if ()
+		if ("set_desired_floor")
+			var/floor = params["floor"]
+			desired_icon_state = floor
+		if("set_desired_dir")
+			var/d = params["dir"]
+			switch(d)
+				if("1")
+					desired_dir = 1
+				if("2")
+					desired_dir = 2
+				if("4")
+					desired_dir = 4
+				if("5")
+					desired_dir = 5
+				if("6")
+					desired_dir = 6
+				if("8")
+					desired_dir = 8
+				if("9")
+					desired_dir = 9
+				if("10")
+					desired_dir = 10
