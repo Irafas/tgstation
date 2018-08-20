@@ -12,8 +12,8 @@
 		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "4"}' state='{{data.desired_dir == 4 ? "selected" : null}}'>East</ui-button>
 		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "6"}' state='{{data.desired_dir == 6 ? "selected" : null}}'>South East</ui-button>
 		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "2"}' state='{{data.desired_dir == 2 ? "selected" : null}}'>South</ui-button>
-		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "9"}' state='{{data.desired_dir == 9 ? "selected" : null}}'>South West</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "10"}' state='{{data.desired_dir == 10 ? "selected" : null}}'>South West</ui-button>
 		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "8"}' state='{{data.desired_dir == 8 ? "selected" : null}}'>West</ui-button>
-		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "10"}' state='{{data.desired_dir == 10 ? "selected" : null}}'>North West</ui-button>
+		<ui-button grid icon='wrench' action='set_desired_dir' params='{"dir": "9"}' state='{{data.desired_dir == 9 ? "selected" : null}}'>North West</ui-button>
 	</ui-section>
 </ui-display>

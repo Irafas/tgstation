@@ -12,8 +12,6 @@
 	novariants = TRUE
 	var/turf_type = null
 	var/mineralType = null
-	var/desired_dir = NORTH
-	var/desired_icon_state = "red"
 
 /obj/item/stack/tile/Initialize(mapload, amount)
 	. = ..()
@@ -213,6 +211,9 @@
 	mineralType = "metal"
 	armor = list("melee" = 0, "bullet" = 0, "laser" = 0, "energy" = 0, "bomb" = 0, "bio" = 0, "rad" = 0, "fire" = 100, "acid" = 70)
 	resistance_flags = FIRE_PROOF
+	var/desired_dir = NORTH
+	var/desired_icon_state = "floor"
+
 
 /obj/item/stack/tile/plasteel/cyborg
 	desc = "The ground you walk on." //Not the usual floor tile desc as that refers to throwing, Cyborgs can't do that - RR
@@ -227,12 +228,12 @@
 		var/datum/asset/assets = get_asset_datum(/datum/asset/spritesheet/pipes)
 		assets.send(user)
 
-		ui = new(user, src, ui_key, "tile_plasteel", name, 300, 550, master_ui, state)
+		ui = new(user, src, ui_key, "tile_plasteel", name, 550, 550, master_ui, state)
 		ui.open()
 
 /obj/item/stack/tile/plasteel/ui_data(mob/user)
 	var/list/data = list(
-		"Direction" = desired_dir,
+		"desired_dir" = desired_dir,
 		"desired_floor" = desired_icon_state
 	)
 
@@ -255,24 +256,6 @@
 
 	switch(action)
 		if ("set_desired_floor")
-			var/floor = params["floor"]
-			desired_icon_state = floor
+			desired_icon_state = params["floor"]
 		if("set_desired_dir")
-			var/d = params["dir"]
-			switch(d)
-				if("1")
-					desired_dir = 1
-				if("2")
-					desired_dir = 2
-				if("4")
-					desired_dir = 4
-				if("5")
-					desired_dir = 5
-				if("6")
-					desired_dir = 6
-				if("8")
-					desired_dir = 8
-				if("9")
-					desired_dir = 9
-				if("10")
-					desired_dir = 10
+			desired_dir = text2num(params["dir"])

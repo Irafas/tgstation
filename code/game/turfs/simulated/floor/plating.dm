@@ -78,8 +78,9 @@
 				F.state = L.state
 			if(istype(W, /obj/item/stack/tile/plasteel))
 				var/turf/open/floor/plasteel/P = T
-				P.dir = W.desired_dir
-				P.icon_state = W.desired_icon_state
+				var/obj/item/stack/tile/plasteel/Z = W
+				P.dir = Z.desired_dir
+				P.icon_state = Z.desired_icon_state
 			playsound(src, 'sound/weapons/genhit.ogg', 50, 1)
 		else
 			to_chat(user, "<span class='warning'>This section is too damaged to support a tile! Use a welder to fix the damage.</span>")
