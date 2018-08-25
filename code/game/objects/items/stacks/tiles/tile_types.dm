@@ -214,6 +214,8 @@
 	var/desired_dir = NORTH
 	var/desired_icon_state = "floor"
 
+	GLOBAL_LIST_INIT(plasteel_ui_alldirs, list(list("dir"=NORTH,"name"="North"),list("dir"=NORTHEAST,"name"="North East"),list("dir"=EAST,"name"="East"),list("dir"=SOUTHEAST,"name"="South East"),\
+	list("dir"=SOUTH,"name"="South"),list("dir"=SOUTHWEST,"name"="South West"),list("dir"=WEST,"name"="West"),list("dir"=NORTHWEST,"name"="North West")))
 
 /obj/item/stack/tile/plasteel/cyborg
 	desc = "The ground you walk on." //Not the usual floor tile desc as that refers to throwing, Cyborgs can't do that - RR
@@ -234,7 +236,8 @@
 /obj/item/stack/tile/plasteel/ui_data(mob/user)
 	var/list/data = list(
 		"desired_dir" = desired_dir,
-		"desired_floor" = desired_icon_state
+		"desired_floor" = desired_icon_state,
+		"alldirs" = GLOB.plasteel_ui_alldirs
 	)
 
 	var/list/floors = list("floor","white","bar","cafeteria","red","redcorner","redfull","whitered","whiteredcorner",\
