@@ -217,6 +217,43 @@
 	GLOBAL_LIST_INIT(plasteel_ui_alldirs, list(list("dir"=NORTH,"name"="North"),list("dir"=NORTHEAST,"name"="North East"),list("dir"=EAST,"name"="East"),list("dir"=SOUTHEAST,"name"="South East"),\
 	list("dir"=SOUTH,"name"="South"),list("dir"=SOUTHWEST,"name"="South West"),list("dir"=WEST,"name"="West"),list("dir"=NORTHWEST,"name"="North West")))
 
+	//GLOBAL_LIST_INIT(plasteel_ui_floors,list(list("floor"="floor","name"="Floor"),list("floor"="white","name"="White")))
+
+	GLOBAL_LIST_INIT(plasteel_ui_floors,list(\
+		list("category"="White","contents" = list(\
+			list("floor"="white","name"="White"),\
+			list("floor"="whitered","name"="White Red"),\
+			list("floor"="whiteredcorner","name"="White Red Corner"),\
+			list("floor"="whiteredfull","name"="White Red Full"),\
+			list("floor"="whiteblue","name"="White Blue"),\
+			list("floor"="whitebluecorner","name"="White Blue Corner"),\
+			list("floor"="whitebluefull","name"="White Blue Full"),\
+			list("floor"="whitegreen","name"="White Green"),\
+			list("floor"="whitegreencorner","name"="White Green Corner"),\
+			list("floor"="whitegreenfull","name"="White Green Full"),\
+			list("floor"="whiteyellow","name"="White Yellow"),\
+			list("floor"="whiteyellowcorner","name"="White Yellow Corner"),\
+			list("floor"="whiteyellowfull","name"="White Yellow Full"),\
+			list("floor"="whitepurple","name"="White Purple"),\
+			list("floor"="whitepurplecorner","name"="White Purple Corner"),\
+			list("floor"="whitepurplefull","name"="White Purple Full"))),\
+		list("category"="Red","contents"=list(\
+			list("floor"="red","name"="Red"),\
+			list("floor"="redcorner","name"="Red Corner"),\
+			list("floor"="redfull","name"="Red Full"))),\
+		list("category"="Blue","contents"=list(\
+			list("floor"="blue","name"="Blue"),\
+			list("floor"="bluecorner","name"="Blue Corner"),\
+			list("floor"="bluefull","name"="Blue Full"))),\
+		list("category"="Green","contents"=list(\
+			list("floor"="green","name"="Green"),\
+			list("floor"="greencorner","name"="Green Corner"),\
+			list("floor"="greenfull","name"="Green Full"))),\
+		list("category"="Yellow","contents"=list(\
+			list("floor"="yellow","name"="Yellow"),\
+			list("floor"="yellowcorner","name"="Yellow Corner"),\
+			list("floor"="yellowfull","name"="Yellow Full")))))
+
 /obj/item/stack/tile/plasteel/cyborg
 	desc = "The ground you walk on." //Not the usual floor tile desc as that refers to throwing, Cyborgs can't do that - RR
 	materials = list() // All other Borg versions of items have no Metal or Glass - RR
@@ -230,25 +267,16 @@
 		var/datum/asset/assets = get_asset_datum(/datum/asset/spritesheet/pipes)
 		assets.send(user)
 
-		ui = new(user, src, ui_key, "tile_plasteel", name, 550, 550, master_ui, state)
+		ui = new(user, src, ui_key, "tile_plasteel", name, 600, 550, master_ui, state)
 		ui.open()
 
 /obj/item/stack/tile/plasteel/ui_data(mob/user)
 	var/list/data = list(
 		"desired_dir" = desired_dir,
 		"desired_floor" = desired_icon_state,
-		"alldirs" = GLOB.plasteel_ui_alldirs
+		"alldirs" = GLOB.plasteel_ui_alldirs,
+		"floors" = GLOB.plasteel_ui_floors
 	)
-
-	var/list/floors = list("floor","white","bar","cafeteria","red","redcorner","redfull","whitered","whiteredcorner",\
-	"whiteredfull","blue","bluecorner","bluefull","whiteblue","whitebluecorner","whitebluefull","green","greencorner",\
-	"greenfull","whitegreen","whitegreencorner","whitegreenfull","yellow","yellowcorner","yellowfull","whiteyellow",\
-	"whiteyellowcorner","whiteyellowfull")
-
-	var/Floor_Type_List[0]
-	for(var/re in floors)
-		Floor_Type_List.Add(list(list("floor" = re)))
-	data["floors"] = Floor_Type_List
 	return data
 
 /obj/item/stack/tile/plasteel/ui_act(action, params)

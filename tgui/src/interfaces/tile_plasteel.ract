@@ -1,14 +1,18 @@
-<ui-display title='Floor'>
-	<ui-section>
-		{{#each data.floors}}
-			<ui-button grid icon='wrench' action='set_desired_floor' params='{"floor": "{{floor}}"}' state='{{data.desired_floor == floor ? "selected" : null}}'>{{floor}}</ui-button>
-		{{/each}}
-	</ui-section>
-</ui-display>
 <ui-display title='Direction'>
 	<ui-section>
 		{{#each data.alldirs}}
 			<ui-button grid action='set_desired_dir' params='{"dir": {{dir}}}' state='{{data.desired_dir == dir ? "selected" : null}}'>{{name}}</ui-button>
+		{{/each}}
+	</ui-section>
+</ui-display>
+<ui-display title='Floor'>
+	<ui-section>
+		{{#each data.floors}}
+			<ui-display title='{{category}}'>
+				{{#each contents}}
+					<ui-button grid action='set_desired_floor' params='{"floor": "{{floor}}"}' state='{{data.desired_floor == floor ? "selected" : null}}'>{{name}}</ui-button>
+				{{/each}}
+			</ui-display>
 		{{/each}}
 	</ui-section>
 </ui-display>
