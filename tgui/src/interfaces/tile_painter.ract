@@ -1,0 +1,39 @@
+<ui-display title='Tile Painter'>
+  <ui-section label='Colour'>
+    <ui-button id="NW" action='setNW' class='butt'></ui-button>
+    <span class='tile' style='background-color: {{data.NWcolor}};' onclick='document.getElementById("NW").click()'></span>
+    <span class='tile' style='background-color: {{data.NEcolor}};' onclick='document.getElementById("NE").click()'></span>
+    <ui-button id="NE" action='setNE' class='butt'>Set</ui-button>
+
+    <br/>
+
+    <ui-button action='setSW' class='butt' id="SW">Set</ui-button>
+    <span class='tile' style='background-color: {{data.SWcolor}};' onclick='document.getElementById("SW").click()'></span>
+    <span class='tile' style='background-color: {{data.SEcolor}};' onclick='document.getElementById("SE").click()'></span>
+    <ui-button action='setSE' class='butt' id="SE">Set</ui-button>
+
+	<br/>
+
+	<ui-button class='.newtile' action='setSW'></ui-button>
+  </ui-section>
+</ui-display>
+
+<style>
+	.newtile {
+		width: 100px;
+		height: 100px;
+		background-color: #4CAF50;
+		padding: 15px 32px;
+	}
+	.tile {
+		width: 32px;
+		height: 32px;
+		border: 1px solid #434343;
+		position: relative;
+		top: 2px;
+		display: inline-block;
+	}
+  .butt {
+      visibility: hidden;
+  }
+</style>

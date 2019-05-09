@@ -4,6 +4,12 @@
 	layer = TURF_PLATING_DECAL_LAYER
 	alpha = 110
 
+/obj/effect/turf_decal/tile/Initialize(mapload, _color, _dir)
+	if (_color && _dir)
+		color = _color
+		dir = _dir
+	. = ..()
+
 /obj/effect/turf_decal/tile/blue
 	name = "blue corner"
 	color = "#52B4E9"
