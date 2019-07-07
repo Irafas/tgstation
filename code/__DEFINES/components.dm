@@ -237,6 +237,9 @@
 #define COMSIG_PROJECTILE_ON_HIT "projectile_on_hit"			// from base of /obj/item/projectile/proc/on_hit(): (atom/movable/firer, atom/target, Angle)
 #define COMSIG_PROJECTILE_BEFORE_FIRE "projectile_before_fire" 			// from base of /obj/item/projectile/proc/fire(): (obj/item/projectile, atom/original_target)
 
+// /obj/item/gun signals
+#define COMSIG_GUN_FIRE_DRY	"gun_fire_dry"						// from /obj/item/gun/proc/shoot_with_empty_chamber()
+#define COMSIG_GUN_FIRE_LIVE "gun_fire_live"					// from /obj/item/gun/proc/shoot_live_shot()
 
 // /mob/living/carbon/human signals
 #define COMSIG_HUMAN_MELEE_UNARMED_ATTACK "human_melee_unarmed_attack"			//from mob/living/carbon/human/UnarmedAttack(): (atom/target)
