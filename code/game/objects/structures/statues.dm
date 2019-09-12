@@ -1,8 +1,3 @@
-
-#define BAD_ART 12.5
-#define GOOD_ART 25
-#define GREAT_ART 50
-
 /obj/structure/statue
 	name = "statue"
 	desc = "Placeholder. Yell at Firecage if you SOMEHOW see this."
@@ -15,7 +10,11 @@
 	var/material_drop_type = /obj/item/stack/sheet/metal
 	var/impressiveness = 15
 	CanAtmosPass = ATMOS_PASS_DENSITY
+	var/art_type = /datum/component/art
 
+/obj/structure/statue/Initialize()
+	. = ..()
+	AddComponent(art_type, impressiveness)
 
 /obj/structure/statue/attackby(obj/item/W, mob/living/user, params)
 	add_fingerprint(user)
@@ -26,36 +25,14 @@
 			if(!W.tool_start_check(user, amount=0))
 				return FALSE
 
-			user.visible_message("[user] is slicing apart the [name].", \
+			user.visible_message("<span class='notice'>[user] is slicing apart the [name].</span>", \
 								"<span class='notice'>You are slicing apart the [name]...</span>")
 			if(W.use_tool(src, user, 40, volume=50))
-				user.visible_message("[user] slices apart the [name].", \
+				user.visible_message("<span class='notice'>[user] slices apart the [name].</span>", \
 									"<span class='notice'>You slice apart the [name]!</span>")
 				deconstruct(TRUE)
 			return
 	return ..()
-
-/obj/structure/statue/attack_hand(mob/living/user)
-	. = ..()
-	if(.)
-		return
-	add_fingerprint(user)
-	if(!do_after(user, 20, target = src))
-		return
-	user.visible_message("[user] rubs some dust off [src].", \
-						 "<span class='notice'>You take in [src], rubbing some dust off its surface.</span>")
-	if(!ishuman(user)) // only humans have the capacity to appreciate art
-		return
-	var/totalimpressiveness = (impressiveness *(obj_integrity/max_integrity))
-	switch(totalimpressiveness)
-		if(GREAT_ART to 100)
-			SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT, "artgreat", /datum/mood_event/artgreat)
-		if (GOOD_ART to GREAT_ART)
-			SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT, "artgood", /datum/mood_event/artgood)
-		if (BAD_ART to GOOD_ART)
-			SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT, "artok", /datum/mood_event/artok)
-		if (0 to BAD_ART)
-			SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT, "artbad", /datum/mood_event/artbad)
 
 /obj/structure/statue/deconstruct(disassembled = TRUE)
 	if(!(flags_1 & NODECONSTRUCT_1))
@@ -273,10 +250,9 @@
 
 /obj/structure/statue/bananium/proc/honk()
 	if(!spam_flag)
-		spam_flag = 1
-		playsound(src.loc, 'sound/items/bikehorn.ogg', 50, 1)
-		spawn(20)
-			spam_flag = 0
+		spam_flag = TRUE
+		playsound(src.loc, 'sound/items/bikehorn.ogg', 50, TRUE)
+		addtimer(VARSET_CALLBACK(src, spam_flag, FALSE), 2 SECONDS)
 
 /////////////////////sandstone/////////////////////////////////////////
 
@@ -307,3 +283,19 @@
 	name = "snowman"
 	desc = "Several lumps of snow put together to form a snowman."
 	icon_state = "snowman"
+
+/obj/structure/statue/snow/snowlegion
+    name = "snowlegion"
+    desc = "Looks like that weird kid with the tiger plushie has been round here again."
+    icon_state = "snowlegion"
+
+///////////////////////////////bronze///////////////////////////////////
+
+/obj/structure/statue/bronze
+	material_drop_type = /obj/item/stack/tile/bronze
+
+/obj/structure/statue/bronze/marx
+	name = "\improper Karl Marx bust"
+	desc = "A bust depicting a certain 19th century economist. You get the feeling a specter is haunting the station."
+	icon_state = "marx"
+	art_type = /datum/component/art/rev

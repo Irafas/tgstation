@@ -136,6 +136,16 @@
 	T.visible_message("<span class='danger'>The slime extract begins to vibrate adorably!</span>")
 	addtimer(CALLBACK(src, .proc/chemical_mob_spawn, holder, 1, "Friendly Gold Slime", FRIENDLY_SPAWN, "neutral"), 50)
 
+/datum/chemical_reaction/slime/slimemobspawn/spider
+	name = "Slime Crit Traitor Spider"
+	id = "m_tele6"
+	required_reagents = list(/datum/reagent/spider_extract = 1)
+
+/datum/chemical_reaction/slime/slimemobspawn/spider/summon_mobs(datum/reagents/holder, turf/T)
+	T.visible_message("<span class='danger'>The slime extract begins to vibrate crikey-ingly!</span>")
+	addtimer(CALLBACK(src, .proc/chemical_mob_spawn, holder, 3, "Traitor Spider Slime", /mob/living/simple_animal/hostile/poison/giant_spider/nurse/midwife, "neutral", FALSE), 50)
+
+
 //Silver
 /datum/chemical_reaction/slime/slimebork
 	name = "Slime Bork"
@@ -148,7 +158,7 @@
 	//BORK BORK BORK
 	var/turf/T = get_turf(holder.my_atom)
 
-	playsound(T, 'sound/effects/phasein.ogg', 100, 1)
+	playsound(T, 'sound/effects/phasein.ogg', 100, TRUE)
 
 	for(var/mob/living/carbon/C in viewers(T, null))
 		C.flash_act()
@@ -200,10 +210,12 @@
 /datum/chemical_reaction/slime/slimefoam
 	name = "Slime Foam"
 	id = "m_foam"
-	results = list(/datum/reagent/fluorosurfactant = 20, /datum/reagent/water = 20)
 	required_reagents = list(/datum/reagent/water = 5)
 	required_container = /obj/item/slime_extract/blue
 	required_other = TRUE
+
+/datum/chemical_reaction/slime/slimefoam/on_reaction(datum/reagents/holder)
+	holder.create_foam(/datum/effect_system/foam_spread,80, "<span class='danger'>[src] spews out foam!</span>")
 
 //Dark Blue
 /datum/chemical_reaction/slime/slimefreeze

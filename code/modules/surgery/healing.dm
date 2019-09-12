@@ -9,22 +9,21 @@
 	target_mobtypes = list(/mob/living/carbon/human, /mob/living/carbon/monkey)
 	possible_locs = list(BODY_ZONE_CHEST)
 	requires_bodypart_type = 0
-	var/healing_step_type
 	replaced_by = /datum/surgery
+	ignore_clothes = TRUE
+	var/healing_step_type
+	var/antispam = FALSE
 
 /datum/surgery/healing/New(surgery_target, surgery_location, surgery_bodypart)
 	..()
 	if(healing_step_type)
-		steps = list(/datum/surgery_step/incise,
-					/datum/surgery_step/retract_skin,
-					/datum/surgery_step/incise,
-					/datum/surgery_step/clamp_bleeders,
+		steps = list(/datum/surgery_step/incise/nobleed,
 					healing_step_type, //hehe cheeky
 					/datum/surgery_step/close)
 
 /datum/surgery_step/heal
 	name = "repair body"
-	implements = list(/obj/item/hemostat = 100, TOOL_SCREWDRIVER = 35, /obj/item/pen = 15)
+	implements = list(/obj/item/hemostat = 100, TOOL_SCREWDRIVER = 65, /obj/item/pen = 55)
 	repeatable = TRUE
 	time = 25
 	var/brutehealing = 0
@@ -38,7 +37,12 @@
 		woundtype = "bruises"
 	else //why are you trying to 0,0...?
 		woundtype = "burns"
-	user.visible_message("[user] attempts to patch some of [target]'s [woundtype].", "<span class='notice'>You attempt to patch some of [target]'s [woundtype].</span>")
+	if(istype(surgery,/datum/surgery/healing))
+		var/datum/surgery/healing/the_surgery = surgery
+		if(!the_surgery.antispam)
+			display_results(user, target, "<span class='notice'>You attempt to patch some of [target]'s [woundtype].</span>",
+		"<span class='notice'>[user] attempts to patch some of [target]'s [woundtype].</span>",
+		"<span class='notice'>[user] attempts to patch some of [target]'s [woundtype].</span>")
 
 /datum/surgery_step/heal/initiate(mob/user, mob/living/carbon/target, target_zone, obj/item/tool, datum/surgery/surgery, try_to_fail = FALSE)
 	if(..())
@@ -47,13 +51,27 @@
 				break
 
 /datum/surgery_step/heal/success(mob/user, mob/living/carbon/target, target_zone, obj/item/tool, datum/surgery/surgery)
-	user.visible_message("[user] fixes some of [target]'s wounds.", "<span class='notice'>You succeed in fixing some of [target]'s wounds.</span>")
-	target.heal_bodypart_damage(brutehealing,burnhealing)
+	var/umsg = "You succeed in fixing some of [target]'s wounds"
+	var/tmsg = "[user] fixes some of [target]'s wounds"
+	if(get_location_accessible(target, target_zone))
+		target.heal_bodypart_damage(brutehealing,burnhealing)
+	else
+		target.heal_bodypart_damage(brutehealing*0.4,burnhealing*0.4) //60% less healing if with clothes.
+		umsg += " as best as you can while they have clothing on" //space please, no period
+		tmsg += " as best as they can while [target] has clothing on"
+	display_results(user, target, "<span class='notice'>[umsg].</span>",
+		"[tmsg].",
+		"[tmsg].")
+	if(istype(surgery, /datum/surgery/healing))
+		var/datum/surgery/healing/the_surgery = surgery
+		the_surgery.antispam = TRUE
 	return TRUE
 
 /datum/surgery_step/heal/failure(mob/user, mob/living/carbon/target, target_zone, obj/item/tool, datum/surgery/surgery)
-	user.visible_message("[user] screws up!", "<span class='warning'>You screwed up!</span>")
-	target.take_bodypart_damage(5,0)
+	display_results(user, target, "<span class='warning'>You screwed up!</span>",
+		"<span class='warning'>[user] screws up!</span>",
+		"<span class='notice'>[user] fixes some of [target]'s wounds.</span>", TRUE)
+	target.take_bodypart_damage(brutehealing*0.8,burnhealing*0.8)
 	return FALSE
 
 /***************************BRUTE***************************/
@@ -61,18 +79,24 @@
 	name = "Tend Wounds (Bruises)"
 
 /datum/surgery/healing/brute/basic
+	name = "Tend Wounds (Bruises, Basic)"
 	replaced_by = /datum/surgery/healing/brute/upgraded
 	healing_step_type = /datum/surgery_step/heal/brute/basic
+	desc = "A surgical procedure that provides basic treatment for a patient's brute traumas."
 
 /datum/surgery/healing/brute/upgraded
+	name = "Tend Wounds (Bruises, Adv.)"
 	replaced_by = /datum/surgery/healing/brute/upgraded/femto
 	requires_tech = TRUE
 	healing_step_type = /datum/surgery_step/heal/brute/upgraded
+	desc = "A surgical procedure that provides advanced treatment for a patient's brute traumas."
 
 /datum/surgery/healing/brute/upgraded/femto
+	name = "Tend Wounds (Bruises, Exp.)"
 	replaced_by = /datum/surgery/healing/combo/upgraded/femto
 	requires_tech = TRUE
 	healing_step_type = /datum/surgery_step/heal/brute/upgraded/femto
+	desc = "A surgical procedure that provides experimental treatment for a patient's brute traumas."
 
 /********************BRUTE STEPS********************/
 /datum/surgery_step/heal/brute/basic
@@ -90,18 +114,24 @@
 	name = "Tend Wounds (Burn)"
 
 /datum/surgery/healing/burn/basic
+	name = "Tend Wounds (Burn, Basic)"
 	replaced_by = /datum/surgery/healing/burn/upgraded
 	healing_step_type = /datum/surgery_step/heal/burn/basic
+	desc = "A surgical procedure that provides basic treatment for a patient's burns."
 
 /datum/surgery/healing/burn/upgraded
+	name = "Tend Wounds (Burn, Adv.)"
 	replaced_by = /datum/surgery/healing/burn/upgraded/femto
 	requires_tech = TRUE
 	healing_step_type = /datum/surgery_step/heal/burn/upgraded
+	desc = "A surgical procedure that provides advanced treatment for a patient's burns."
 
 /datum/surgery/healing/burn/upgraded/femto
+	name = "Tend Wounds (Burn, Exp.)"
 	replaced_by = /datum/surgery/healing/combo/upgraded/femto
 	requires_tech = TRUE
 	healing_step_type = /datum/surgery_step/heal/burn/upgraded/femto
+	desc = "A surgical procedure that provides experimental treatment for a patient's burns."
 
 /********************BURN STEPS********************/
 /datum/surgery_step/heal/burn/basic
@@ -119,19 +149,24 @@
 
 
 /datum/surgery/healing/combo
-	name = "Tend Wounds (Mixture)"
+	name = "Tend Wounds (Mixture, Basic)"
 	replaced_by = /datum/surgery/healing/combo/upgraded
 	requires_tech = TRUE
 	healing_step_type = /datum/surgery_step/heal/combo
+	desc = "A surgical procedure that provides basic treatment for a patient's burns and brute traumas."
 
 /datum/surgery/healing/combo/upgraded
+	name = "Tend Wounds (Mixture, Adv.)"
 	replaced_by = /datum/surgery/healing/combo/upgraded/femto
 	healing_step_type = /datum/surgery_step/heal/combo/upgraded
+	desc = "A surgical procedure that provides advanced treatment for a patient's burns and brute traumas."
 
 
 /datum/surgery/healing/combo/upgraded/femto //no real reason to type it like this except consistency, don't worry you're not missing anything
+	name = "Tend Wounds (Mixture, Exp.)"
 	replaced_by = null
 	healing_step_type = /datum/surgery_step/heal/combo/upgraded/femto
+	desc = "A surgical procedure that provides experimental treatment for a patient's burns and brute traumas."
 
 /********************COMBO STEPS********************/
 /datum/surgery_step/heal/combo

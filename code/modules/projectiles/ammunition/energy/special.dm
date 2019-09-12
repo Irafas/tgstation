@@ -12,6 +12,9 @@
 	select_name = "declone"
 	fire_sound = 'sound/weapons/pulse3.ogg'
 
+/obj/item/ammo_casing/energy/declone/weak
+	projectile_type = /obj/item/projectile/energy/declone/weak
+
 /obj/item/ammo_casing/energy/flora
 	fire_sound = 'sound/effects/stealthoff.ogg'
 	harmful = FALSE
@@ -66,3 +69,8 @@
 	e_cost = 200
 	select_name = "stun"
 	projectile_type = /obj/item/projectile/energy/tesla/revolver
+
+/obj/item/ammo_casing/energy/shrink
+	projectile_type = /obj/item/projectile/beam/shrink
+	select_name = "shrink ray"
+	e_cost = 200

@@ -120,7 +120,7 @@
 		var/mob/living/carbon/C = user
 		C.throw_mode_on()
 	icon_state = "firelemon_active"
-	playsound(loc, 'sound/weapons/armbomb.ogg', 75, 1, -3)
+	playsound(loc, 'sound/weapons/armbomb.ogg', 75, TRUE, -3)
 	addtimer(CALLBACK(src, .proc/prime), rand(10, 60))
 
 /obj/item/reagent_containers/food/snacks/grown/firelemon/burn()
@@ -165,7 +165,7 @@
 	icon_state = "seed-orange"
 	species = "orange"
 	plantname = "Extradimensional Orange Tree"
-	product = /obj/item/reagent_containers/food/snacks/grown/citrus/orange
+	product = /obj/item/reagent_containers/food/snacks/grown/citrus/orange_3d
 	lifespan = 60
 	endurance = 50
 	yield = 5
@@ -177,7 +177,7 @@
 	reagents_add = list(/datum/reagent/consumable/nutriment/vitamin = 0.04, /datum/reagent/consumable/nutriment = 0.05)
 
 /obj/item/reagent_containers/food/snacks/grown/citrus/orange_3d
-	seed = /obj/item/seeds/orange
+	seed = /obj/item/seeds/orange_3d
 	name = "extradimensional orange"
 	desc = "You can hardly wrap your head around this thing."
 	icon_state = "orang"

@@ -136,7 +136,7 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 			continue
 
 		if(!(ROLE_BLOB in L.faction))
-			playsound(L, 'sound/effects/splat.ogg', 50, 1)
+			playsound(L, 'sound/effects/splat.ogg', 50, TRUE)
 			L.death()
 			new/mob/living/simple_animal/hostile/blob/blobspore(T)
 		else
@@ -189,9 +189,9 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 	add_points(0)
 
 /mob/camera/blob/examine(mob/user)
-	..()
+	. = ..()
 	if(blobstrain)
-		to_chat(user, "Its strain is <font color=\"[blobstrain.color]\">[blobstrain.name]</font>.")
+		. += "Its strain is <font color=\"[blobstrain.color]\">[blobstrain.name]</font>."
 
 /mob/camera/blob/update_health_hud()
 	if(blob_core)
@@ -212,7 +212,7 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 		if(client.prefs.muted & MUTE_IC)
 			to_chat(src, "You cannot send IC messages (muted).")
 			return
-		if (src.client.handle_spam_prevention(message,MUTE_IC))
+		if (!(ignore_spam || forced) && src.client.handle_spam_prevention(message,MUTE_IC))
 			return
 
 	if (stat)
