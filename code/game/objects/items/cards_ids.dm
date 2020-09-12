@@ -41,18 +41,13 @@
 	.=..()
 	update_icon()
 
-/obj/item/card/data/update_icon()
-	cut_overlays()
+/obj/item/card/data/update_overlays()
+	. = ..()
 	if(detail_color == COLOR_FLOORTILE_GRAY)
 		return
 	var/mutable_appearance/detail_overlay = mutable_appearance('icons/obj/card.dmi', "[icon_state]-color")
 	detail_overlay.color = detail_color
-	add_overlay(detail_overlay)
-
-/obj/item/proc/GetCard()
-
-/obj/item/card/data/GetCard()
-	return src
+	. += detail_overlay
 
 /obj/item/card/data/full_color
 	desc = "A plastic magstripe card for simple and speedy data storage and transfer. This one has the entire card colored."
@@ -124,11 +119,13 @@
 	var/obj/machinery/paystand/my_store
 	var/uses_overlays = TRUE
 	var/icon/cached_flat_icon
+	var/registered_age = 13 // default age for ss13 players
 
 /obj/item/card/id/Initialize(mapload)
 	. = ..()
 	if(mapload && access_txt)
 		access = text2access(access_txt)
+	RegisterSignal(src, COMSIG_ATOM_UPDATED_ICON, .proc/update_in_wallet)
 
 /obj/item/card/id/Destroy()
 	if (registered_account)
@@ -139,14 +136,17 @@
 
 /obj/item/card/id/attack_self(mob/user)
 	if(Adjacent(user))
-		user.visible_message("<span class='notice'>[user] shows you: [icon2html(src, viewers(user))] [src.name].</span>", "<span class='notice'>You show \the [src.name].</span>")
+		var/minor
+		if(registered_name && registered_age && registered_age < AGE_MINOR)
+			minor = " <b>(MINOR)</b>"
+		user.visible_message("<span class='notice'>[user] shows you: [icon2html(src, viewers(user))] [src.name][minor].</span>", "<span class='notice'>You show \the [src.name][minor].</span>")
 	add_fingerprint(user)
 
 /obj/item/card/id/vv_edit_var(var_name, var_value)
 	. = ..()
 	if(.)
 		switch(var_name)
-			if("assignment","registered_name")
+			if("assignment","registered_name","registered_age")
 				update_label()
 
 /obj/item/card/id/attackby(obj/item/W, mob/user, params)
@@ -187,7 +187,7 @@
 	else
 		to_chat(user, "<span class='notice'>You insert [I] into [src], adding [cash_money] credits to the linked account.</span>")
 
-	to_chat(user, "<span class='notice'>The linked account now reports a balance of $[registered_account.account_balance].</span>")
+	to_chat(user, "<span class='notice'>The linked account now reports a balance of [registered_account.account_balance] cr.</span>")
 	qdel(I)
 
 /obj/item/card/id/proc/mass_insert_money(list/money, mob/user)
@@ -278,14 +278,16 @@
 
 /obj/item/card/id/examine(mob/user)
 	. = ..()
+	if(registered_age)
+		. += "The card indicates that the holder is [registered_age] years old. [(registered_age < AGE_MINOR) ? "There's a holographic stripe that reads <b><span class='danger'>'MINOR: DO NOT SERVE ALCOHOL OR TOBACCO'</span></b> along the bottom of the card." : ""]"
 	if(mining_points)
 		. += "There's [mining_points] mining equipment redemption point\s loaded onto this card."
 	if(registered_account)
-		. += "The account linked to the ID belongs to '[registered_account.account_holder]' and reports a balance of $[registered_account.account_balance]."
+		. += "The account linked to the ID belongs to '[registered_account.account_holder]' and reports a balance of [registered_account.account_balance] cr."
 		if(registered_account.account_job)
 			var/datum/bank_account/D = SSeconomy.get_dep_account(registered_account.account_job.paycheck_department)
 			if(D)
-				. += "The [D.account_holder] reports a balance of $[D.account_balance]."
+				. += "The [D.account_holder] reports a balance of [D.account_balance] cr."
 		. += "<span class='info'>Alt-Click the ID to pull money from the linked account in the form of holochips.</span>"
 		. += "<span class='info'>You can insert credits into the linked account by pressing holochips, cash, or coins against the ID.</span>"
 		if(registered_account.account_holder == user.real_name)
@@ -299,26 +301,26 @@
 /obj/item/card/id/GetID()
 	return src
 
-/obj/item/card/id/update_icon(blank=FALSE)
-	cut_overlays()
-	cached_flat_icon = null
+/obj/item/card/id/RemoveID()
+	return src
+
+/obj/item/card/id/update_overlays()
+	. = ..()
 	if(!uses_overlays)
 		return
+	cached_flat_icon = null
 	var/job = assignment ? ckey(GetJobName()) : null
-	var/list/add_overlays = list()
-	if(!blank)
-		add_overlays += mutable_appearance(icon, "assigned")
+	if(registered_name && registered_name != "Captain")
+		. += mutable_appearance(icon, "assigned")
 	if(job)
-		add_overlays += mutable_appearance(icon, "id[job]")
-	add_overlay(add_overlays)
-	update_in_wallet(add_overlays)
+		. += mutable_appearance(icon, "id[job]")
 
-/obj/item/card/id/proc/update_in_wallet(overlays)
+/obj/item/card/id/proc/update_in_wallet()
 	if(istype(loc, /obj/item/storage/wallet))
 		var/obj/item/storage/wallet/powergaming = loc
 		if(powergaming.front_id == src)
 			powergaming.update_label()
-			powergaming.update_icon(overlays)
+			powergaming.update_icon()
 
 /obj/item/card/id/proc/get_cached_flat_icon()
 	if(!cached_flat_icon)
@@ -340,7 +342,7 @@ update_label()
 /obj/item/card/id/proc/update_label()
 	var/blank = !registered_name
 	name = "[blank ? id_type_name : "[registered_name]'s ID Card"][(!assignment) ? "" : " ([assignment])"]"
-	update_icon(blank)
+	update_icon()
 
 /obj/item/card/id/silver
 	name = "silver identification card"
@@ -402,38 +404,31 @@ update_label()
 		if(user.incapacitated())
 			return
 		if(popup_input == "Forge/Reset" && !forged)
-			var/input_text = input(user, "What name would you like to put on this card? Leave blank to randomise.", "Agent card name", registered_name ? registered_name : (ishuman(user) ? user.real_name : user.name))as text | null
-
-			if (isnull(input_text))
-				return
-
-			var/t = copytext(sanitize(input_text), 1, 26)
-			if(!t || t == "Unknown" || t == "floor" || t == "wall" || t == "r-wall") //Same as mob/dead/new_player/prefrences.dm
-				if (ishuman(user))
-					var/mob/living/carbon/human/human_agent = user
-
-					// Invalid/blank names give a randomly generated one.
-					if (human_agent.gender == "male")
-						registered_name = "[pick(GLOB.first_names_male)] [pick(GLOB.last_names)]"
-					else if (human_agent.gender == "female")
-						registered_name = "[pick(GLOB.first_names_female)] [pick(GLOB.last_names)]"
-					else
-						registered_name = "[pick(GLOB.first_names)] [pick(GLOB.last_names)]"
+			var/input_name = stripped_input(user, "What name would you like to put on this card? Leave blank to randomise.", "Agent card name", registered_name ? registered_name : (ishuman(user) ? user.real_name : user.name), MAX_NAME_LEN)
+			input_name = reject_bad_name(input_name)
+			if(!input_name)
+				// Invalid/blank names give a randomly generated one.
+				if(user.gender == MALE)
+					input_name = "[pick(GLOB.first_names_male)] [pick(GLOB.last_names)]"
+				else if(user.gender == FEMALE)
+					input_name = "[pick(GLOB.first_names_female)] [pick(GLOB.last_names)]"
 				else
-					alert ("Invalid name.")
-					return
-			else
-				registered_name = t
+					input_name = "[pick(GLOB.first_names)] [pick(GLOB.last_names)]"
 
-			var/u = copytext(sanitize(input(user, "What occupation would you like to put on this card?\nNote: This will not grant any access levels other than Maintenance.", "Agent card job assignment", assignment ? assignment : "Assistant") as text | null),1,MAX_MESSAGE_LEN)
-			if(!u)
-				registered_name = ""
+			var/target_occupation = stripped_input(user, "What occupation would you like to put on this card?\nNote: This will not grant any access levels other than Maintenance.", "Agent card job assignment", assignment ? assignment : "Assistant", MAX_MESSAGE_LEN)
+			if(!target_occupation)
 				return
-			assignment = u
+
+			var/newAge = input(user, "Choose the ID's age:\n([AGE_MIN]-[AGE_MAX])", "Agent card age") as num|null
+			if(newAge)
+				registered_age = max(round(text2num(newAge)), 0)
+
+			registered_name = input_name
+			assignment = target_occupation
 			update_label()
 			forged = TRUE
 			to_chat(user, "<span class='notice'>You successfully forge the ID card.</span>")
-
+			log_game("[key_name(user)] has forged \the [initial(name)] with name \"[registered_name]\" and occupation \"[assignment]\".")
 
 			// First time use automatically sets the account id to the user.
 			if (first_use && !registered_account)
@@ -450,6 +445,7 @@ update_label()
 		else if (popup_input == "Forge/Reset" && forged)
 			registered_name = initial(registered_name)
 			assignment = initial(assignment)
+			log_game("[key_name(user)] has reset \the [initial(name)] named \"[src]\" to default.")
 			update_label()
 			forged = FALSE
 			to_chat(user, "<span class='notice'>You successfully reset the ID card.</span>")
@@ -475,6 +471,27 @@ update_label()
 	icon_state = "syndie"
 	access = list(ACCESS_SYNDICATE)
 	uses_overlays = FALSE
+	registered_age = null
+
+/obj/item/card/id/syndicate_command/crew_id
+	name = "syndicate ID card"
+	id_type_name = "syndicate ID card"
+	desc = "An ID straight from the Syndicate."
+	registered_name = "Syndicate"
+	assignment = "Syndicate Operative"
+	icon_state = "syndie"
+	access = list(ACCESS_SYNDICATE)
+	uses_overlays = FALSE
+
+/obj/item/card/id/syndicate_command/captain_id
+	name = "syndicate captain ID card"
+	id_type_name = "syndicate captain ID card"
+	desc = "An ID straight from the Syndicate."
+	registered_name = "Syndicate"
+	assignment = "Syndicate Ship Captain"
+	icon_state = "syndie"
+	access = list(ACCESS_SYNDICATE)
+	uses_overlays = FALSE
 
 /obj/item/card/id/captains_spare
 	name = "captain's spare ID"
@@ -486,6 +503,7 @@ update_label()
 	righthand_file = 'icons/mob/inhands/equipment/idcards_righthand.dmi'
 	registered_name = "Captain"
 	assignment = "Captain"
+	registered_age = null
 
 /obj/item/card/id/captains_spare/Initialize()
 	var/datum/job/captain/J = new/datum/job/captain
@@ -496,7 +514,7 @@ update_label()
 /obj/item/card/id/captains_spare/update_label() //so it doesn't change to Captain's ID card (Captain) on a sneeze
 	if(registered_name == "Captain")
 		name = "[id_type_name][(!assignment || assignment == "Captain") ? "" : " ([assignment])"]"
-		update_icon(TRUE)
+		update_icon()
 	else
 		..()
 
@@ -506,8 +524,9 @@ update_label()
 	desc = "An ID straight from Central Command."
 	icon_state = "centcom"
 	registered_name = "Central Command"
-	assignment = "General"
+	assignment = "Central Command"
 	uses_overlays = FALSE
+	registered_age = null
 
 /obj/item/card/id/centcom/Initialize()
 	access = get_all_centcom_access()
@@ -521,35 +540,36 @@ update_label()
 	registered_name = "Emergency Response Team Commander"
 	assignment = "Emergency Response Team Commander"
 	uses_overlays = FALSE
+	registered_age = null
 
 /obj/item/card/id/ert/Initialize()
 	access = get_all_accesses()+get_ert_access("commander")-ACCESS_CHANGE_IDS
 	. = ..()
 
-/obj/item/card/id/ert/Security
+/obj/item/card/id/ert/security
 	registered_name = "Security Response Officer"
 	assignment = "Security Response Officer"
 	icon_state = "ert_security"
 
-/obj/item/card/id/ert/Security/Initialize()
+/obj/item/card/id/ert/security/Initialize()
 	access = get_all_accesses()+get_ert_access("sec")-ACCESS_CHANGE_IDS
 	. = ..()
 
-/obj/item/card/id/ert/Engineer
-	registered_name = "Engineer Response Officer"
-	assignment = "Engineer Response Officer"
+/obj/item/card/id/ert/engineer
+	registered_name = "Engineering Response Officer"
+	assignment = "Engineering Response Officer"
 	icon_state = "ert_engineer"
 
-/obj/item/card/id/ert/Engineer/Initialize()
+/obj/item/card/id/ert/engineer/Initialize()
 	access = get_all_accesses()+get_ert_access("eng")-ACCESS_CHANGE_IDS
 	. = ..()
 
-/obj/item/card/id/ert/Medical
+/obj/item/card/id/ert/medical
 	registered_name = "Medical Response Officer"
 	assignment = "Medical Response Officer"
 	icon_state = "ert_medic"
 
-/obj/item/card/id/ert/Medical/Initialize()
+/obj/item/card/id/ert/medical/Initialize()
 	access = get_all_accesses()+get_ert_access("med")-ACCESS_CHANGE_IDS
 	. = ..()
 
@@ -562,13 +582,43 @@ update_label()
 	access = get_all_accesses()+get_ert_access("sec")-ACCESS_CHANGE_IDS
 	. = ..()
 
-/obj/item/card/id/ert/Janitor
+/obj/item/card/id/ert/janitor
 	registered_name = "Janitorial Response Officer"
 	assignment = "Janitorial Response Officer"
 	icon_state = "ert_janitor"
 
-/obj/item/card/id/ert/Janitor/Initialize()
+/obj/item/card/id/ert/janitor/Initialize()
 	access = get_all_accesses()
+	. = ..()
+
+/obj/item/card/id/ert/clown
+	registered_name = "Entertainment Response Officer"
+	assignment = "Entertainment Response Officer"
+	icon_state = "ert_clown"
+
+/obj/item/card/id/ert/clown/Initialize()
+	access = get_all_accesses()
+	. = ..()
+
+/obj/item/card/id/ert/deathsquad
+	name = "\improper Death Squad ID"
+	id_type_name = "\improper Death Squad ID"
+	desc = "A Death Squad ID card."
+	icon_state = "deathsquad" //NO NO SIR DEATH SQUADS ARENT A PART OF NANOTRASEN AT ALL
+	registered_name = "Death Commando"
+	assignment = "Death Commando"
+	uses_overlays = FALSE
+
+/obj/item/card/id/debug
+	name = "\improper Debug ID"
+	desc = "A debug ID card. Has ALL the all access, you really shouldn't have this."
+	icon_state = "ert_janitor"
+	assignment = "Jannie"
+	uses_overlays = FALSE
+
+/obj/item/card/id/debug/Initialize()
+	access = get_all_accesses()+get_all_centcom_access()+get_all_syndicate_access()
+	registered_account = SSeconomy.get_dep_account(ACCOUNT_CAR)
 	. = ..()
 
 /obj/item/card/id/prisoner
@@ -584,6 +634,7 @@ update_label()
 	uses_overlays = FALSE
 	var/goal = 0 //How far from freedom?
 	var/points = 0
+	registered_age = null
 
 /obj/item/card/id/prisoner/attack_self(mob/user)
 	to_chat(usr, "<span class='notice'>You have accumulated [points] out of the [goal] points you need for freedom.</span>")
@@ -633,6 +684,7 @@ update_label()
 	access = list(ACCESS_AWAY_GENERAL)
 	icon_state = "retro"
 	uses_overlays = FALSE
+	registered_age = null
 
 /obj/item/card/id/away/hotel
 	name = "Staff ID"
@@ -680,6 +732,7 @@ update_label()
 	uses_overlays = FALSE
 	var/department_ID = ACCOUNT_CIV
 	var/department_name = ACCOUNT_CIV_NAME
+	registered_age = null
 
 /obj/item/card/id/departmental_budget/Initialize()
 	. = ..()
@@ -699,37 +752,7 @@ update_label()
 /obj/item/card/id/departmental_budget/update_label()
 	return
 
-/obj/item/card/id/departmental_budget/civ
-	department_ID = ACCOUNT_CIV
-	department_name = ACCOUNT_CIV_NAME
-	icon_state = "civ_budget"
-
-/obj/item/card/id/departmental_budget/eng
-	department_ID = ACCOUNT_ENG
-	department_name = ACCOUNT_ENG_NAME
-	icon_state = "eng_budget"
-
-/obj/item/card/id/departmental_budget/sci
-	department_ID = ACCOUNT_SCI
-	department_name = ACCOUNT_SCI_NAME
-	icon_state = "sci_budget"
-
-/obj/item/card/id/departmental_budget/med
-	department_ID = ACCOUNT_MED
-	department_name = ACCOUNT_MED_NAME
-	icon_state = "med_budget"
-
-/obj/item/card/id/departmental_budget/srv
-	department_ID = ACCOUNT_SRV
-	department_name = ACCOUNT_SRV_NAME
-	icon_state = "srv_budget"
-
 /obj/item/card/id/departmental_budget/car
 	department_ID = ACCOUNT_CAR
 	department_name = ACCOUNT_CAR_NAME
 	icon_state = "car_budget" //saving up for a new tesla
-
-/obj/item/card/id/departmental_budget/sec
-	department_ID = ACCOUNT_SEC
-	department_name = ACCOUNT_SEC_NAME
-	icon_state = "sec_budget"

@@ -46,7 +46,7 @@
 			diode = W
 			to_chat(user, "<span class='notice'>You install a [diode.name] in [src].</span>")
 		else
-			to_chat(user, "<span class='notice'>[src] already has a diode installed.</span>")
+			to_chat(user, "<span class='warning'>[src] already has a diode installed!</span>")
 
 	else if(W.tool_behaviour == TOOL_SCREWDRIVER)
 		if(diode)
@@ -134,7 +134,7 @@
 
 	//catpeople
 	for(var/mob/living/carbon/human/H in view(1,targloc))
-		if(!isfelinid(H) || H.incapacitated() || H.eye_blind )
+		if(!isfelinid(H) || H.incapacitated() || H.is_blind())
 			continue
 		if(user.mobility_flags & MOBILITY_STAND)
 			H.setDir(get_dir(H,targloc)) // kitty always looks at the light

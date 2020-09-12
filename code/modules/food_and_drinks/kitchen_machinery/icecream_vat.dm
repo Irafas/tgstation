@@ -121,7 +121,7 @@
 			else
 				to_chat(user, "<span class='warning'>There is not enough ice cream left!</span>")
 		else
-			to_chat(user, "<span class='notice'>[O] already has ice cream in it.</span>")
+			to_chat(user, "<span class='warning'>[O] already has ice cream in it!</span>")
 		return 1
 	if(istype(O, /obj/item/reagent_containers) && !(O.item_flags & ABSTRACT) && O.is_open_container())
 		. = TRUE //no afterattack
@@ -288,20 +288,19 @@
 	qdel(src)
 
 /obj/machinery/icecream_vat/AltClick(mob/living/user)
-	if(!istype(user) || !user.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+	. = ..()
+	if(!can_interact(user) || !user.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
 		return
 	replace_beaker(user)
 
 /obj/machinery/icecream_vat/proc/replace_beaker(mob/living/user, obj/item/reagent_containers/new_beaker)
+	if(!user)
+		return FALSE
 	if(beaker)
-		beaker.forceMove(drop_location())
-		if(user && Adjacent(user) && !issiliconoradminghost(user))
-			user.put_in_hands(beaker)
+		user.put_in_hands(beaker)
+		beaker = null
 	if(new_beaker)
 		beaker = new_beaker
-	else
-		beaker = null
-		updateDialog()
 	return TRUE
 
 #undef ICECREAM_VANILLA

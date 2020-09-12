@@ -64,7 +64,7 @@
 			"<span class='userdanger'>[user] is trying to inject you with [src]!</span>")
 		if(!do_mob(user, target) || used)
 			return
-		target.visible_message("<span class='danger'>[user] injects [target] with the syringe with [src]!", \
+		target.visible_message("<span class='danger'>[user] injects [target] with the syringe with [src]!</span>", \
 						"<span class='userdanger'>[user] injects you with the syringe with [src]!</span>")
 
 	else
@@ -513,6 +513,7 @@
 	if(M.has_dna() && !HAS_TRAIT(M, TRAIT_RADIMMUNE) && !HAS_TRAIT(M, TRAIT_BADDNA))
 		M.radiation += rand(20/(damage_coeff  ** 2),50/(damage_coeff  ** 2))
 		var/log_msg = "[key_name(user)] injected [key_name(M)] with the [name]"
+		var/pref = ""
 		for(var/mutation in add_mutations)
 			var/datum/mutation/human/HM = mutation
 			if(istype(HM, /datum/mutation/human))
@@ -522,13 +523,14 @@
 					log_msg += "(FAILED)"
 				else
 					M.dna.add_mutation(HM, MUT_EXTRA)
-					name = "expended [name]"
+					pref = "expended"
 			else if(research && M.client)
 				filled = TRUE
-				name = "filled [name]"
+				pref = "filled"
 			else
-				name = "expended [name]"
+				pref = "expended"
 			log_msg += "([mutation])"
+		name = "[pref] [name]"
 		log_attack("[log_msg] [loc_name(user)]")
 		return TRUE
 	return FALSE
